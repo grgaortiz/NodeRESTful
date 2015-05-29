@@ -1,4 +1,3 @@
-
 /*
  * routes/index.js
  * 
@@ -7,6 +6,7 @@
 
 // dependencies
 var geocoder = require('geocoder');
+var extractor = require('email-extractor').Extractor;
 
 // our db model
 var Person = require("../models/model.js");
@@ -18,17 +18,17 @@ var Person = require("../models/model.js");
  * @return {Object} json
  */
 
-exports.index = function(req, res) {
-	
-	console.log("main route requested");
+exports.index = function (req, res) {
 
-	var data = {
-		status: 'OK',
-		message: 'node RESTful API @grgortiz'
-	}
+    console.log("main route requested");
 
-	// respond back with the data
-	res.json(data);
+    var data = {
+        status: 'OK',
+        message: 'node RESTful API @grgortiz'
+    }
+
+    // respond back with the data
+    res.json(data);
 
 }
 
@@ -39,63 +39,63 @@ exports.index = function(req, res) {
  * @return {Object} JSON
  */
 
-exports.create = function(req,res){
+exports.create = function (req, res) {
 
-	console.log(req.body);
+    console.log(req.body);
 
-	// pull out the name and location
-	var name = req.body.name;
-	var location = req.body.location;
+    // pull out the name and location
+    var name = req.body.name;
+    var location = req.body.location;
 
-	//now, geocode that location
-	geocoder.geocode(location, function ( err, data ) {
+    //now, geocode that location
+    geocoder.geocode(location, function (err, data) {
 
-		console.log(data);
-  	
-  	// if we get an error, or don't have any results, respond back with error
-  	if (err || data.status == 'ZERO_RESULTS'){
-  		var jsonData = {status:'ERROR', message: 'Error finding location'};
-  		res.json(jsonData);
-  	}
+        console.log(data);
 
-  	// otherwise, save the user
+        // if we get an error, or don't have any results, respond back with error
+        if (err || data.status == 'ZERO_RESULTS') {
+            var jsonData = {status: 'ERROR', message: 'Error finding location'};
+            res.json(jsonData);
+        }
 
-	  var locationName = data.results[0].formatted_address; // the location name
-	  var lon = data.results[0].geometry.location.lng;
-		var lat = data.results[0].geometry.location.lat;
-  	
-  	// need to put the geo co-ordinates in a lng-lat array for saving
-  	var lnglat_array = [lon,lat];
+        // otherwise, save the user
 
-	  var person = Person({
-	  	name: name,
-	  	locationName: locationName,
-	  	locationGeo: lnglat_array
-	  });
+        var locationName = data.results[0].formatted_address; // the location name
+        var lon = data.results[0].geometry.location.lng;
+        var lat = data.results[0].geometry.location.lat;
 
-	  // now, save that person to the database
-		// mongoose method, see http://mongoosejs.com/docs/api.html#model_Model-save	  
-	  person.save(function(err,data){
-	  	// if err saving, respond back with error
-	  	if (err){
-	  		var jsonData = {status:'ERROR', message: 'Error saving person'};
-	  		return res.json(jsonData);
-	  	}
+        // need to put the geo co-ordinates in a lng-lat array for saving
+        var lnglat_array = [lon, lat];
 
-	  	console.log('saved a new person!');
-	  	console.log(data);
+        var person = Person({
+            name: name,
+            locationName: locationName,
+            locationGeo: lnglat_array
+        });
 
-	  	// now return the json data of the new person
-	  	var jsonData = {
-	  		status: 'OK',
-	  		person: data
-	  	}
+        // now, save that person to the database
+        // mongoose method, see http://mongoosejs.com/docs/api.html#model_Model-save
+        person.save(function (err, data) {
+            // if err saving, respond back with error
+            if (err) {
+                var jsonData = {status: 'ERROR', message: 'Error saving person'};
+                return res.json(jsonData);
+            }
 
-	  	return res.json(jsonData);
+            console.log('saved a new person!');
+            console.log(data);
 
-	  })
+            // now return the json data of the new person
+            var jsonData = {
+                status: 'OK',
+                person: data
+            }
 
-	});		
+            return res.json(jsonData);
+
+        })
+
+    });
 }
 
 /**
@@ -105,28 +105,51 @@ exports.create = function(req,res){
  * @return {Object} JSON
  */
 
-exports.getOne = function(req,res){
+exports.getOne = function (req, res) {
 
-	var requestedId = req.param('id');
+    var requestedId = req.param('id');
 
-	// mongoose method, see http://mongoosejs.com/docs/api.html#model_Model.findById
-	Person.findById(requestedId, function(err,data){
+    // mongoose method, see http://mongoosejs.com/docs/api.html#model_Model.findById
+    Person.findById(requestedId, function (err, data) {
 
-		// if err or no user found, respond with error 
-		if(err || data == null){
-  		var jsonData = {status:'ERROR', message: 'Could not find that person'};
-  		 return res.json(jsonData);
-  	}
+        // if err or no user found, respond with error
+        if (err || data == null) {
+            var jsonData = {status: 'ERROR', message: 'Could not find that person'};
+            return res.json(jsonData);
+        }
 
-  	// otherwise respond with JSON data of the user
-  	var jsonData = {
-  		status: 'OK',
-  		person: data
-  	}
+        // otherwise respond with JSON data of the user
+        var jsonData = {
+            status: 'OK',
+            person: data
+        }
 
-  	return res.json(jsonData);
-	
-	})
+        return res.json(jsonData);
+
+    })
+}
+
+/**
+ * GET '/api/get/:url'
+ * Receives a GET request specifying the url to get
+ * @param  {String} req.param('url'). The url
+ * @return {Object} JSON
+ */
+
+exports.getUrl = function (req, res) {
+
+    var requestedUrl = req.param('url');
+
+    extractor(requestedUrl, function (url, email) {
+
+        var jsonData = {
+            url: url,
+            email: email
+        }
+
+        return res.json(jsonData);
+    });
+
 }
 
 /**
@@ -135,26 +158,26 @@ exports.getOne = function(req,res){
  * @return {Object} JSON
  */
 
-exports.getAll = function(req,res){
+exports.getAll = function (req, res) {
 
-	// mongoose method, see http://mongoosejs.com/docs/api.html#model_Model.find
-	Person.find(function(err, data){
-		// if err or no users found, respond with error 
-		if(err || data == null){
-  		var jsonData = {status:'ERROR', message: 'Could not find people'};
-  		return res.json(jsonData);
-  	}
+    // mongoose method, see http://mongoosejs.com/docs/api.html#model_Model.find
+    Person.find(function (err, data) {
+        // if err or no users found, respond with error
+        if (err || data == null) {
+            var jsonData = {status: 'ERROR', message: 'Could not find people'};
+            return res.json(jsonData);
+        }
 
-  	// otherwise, respond with the data	
+        // otherwise, respond with the data
 
-  	var jsonData = {
-  		status: 'OK',
-  		people: data
-  	}	
+        var jsonData = {
+            status: 'OK',
+            people: data
+        }
 
-  	res.json(jsonData);
+        res.json(jsonData);
 
-	})
+    })
 
 }
 
@@ -166,63 +189,63 @@ exports.getAll = function(req,res){
  * @return {Object} JSON
  */
 
-exports.update = function(req,res){
+exports.update = function (req, res) {
 
-	var requestedId = req.param('id');
+    var requestedId = req.param('id');
 
-	// pull out the name and location
-	var name = req.body.name;
-	var location = req.body.location;
+    // pull out the name and location
+    var name = req.body.name;
+    var location = req.body.location;
 
-	//now, geocode that location
-	geocoder.geocode(location, function ( err, data ) {
+    //now, geocode that location
+    geocoder.geocode(location, function (err, data) {
 
-		console.log(data);
-  	
-  	// if we get an error, or don't have any results, respond back with error
-  	if (err || data.status == 'ZERO_RESULTS'){
-  		var jsonData = {status:'ERROR', message: 'Error finding location'};
-  		res.json(jsonData);
-  	}
+        console.log(data);
 
-  	// otherwise, update the user
+        // if we get an error, or don't have any results, respond back with error
+        if (err || data.status == 'ZERO_RESULTS') {
+            var jsonData = {status: 'ERROR', message: 'Error finding location'};
+            res.json(jsonData);
+        }
 
-	  var locationName = data.results[0].formatted_address; // the location name
-	  var lon = data.results[0].geometry.location.lng;
-		var lat = data.results[0].geometry.location.lat;
-  	
-  	// need to put the geo co-ordinates in a lng-lat array for saving
-  	var lnglat_array = [lon,lat];
+        // otherwise, update the user
 
-	  var dataToUpdate = {
-	  	name: name,
-	  	locationName: locationName,
-	  	locationGeo: lnglat_array
-	  };
+        var locationName = data.results[0].formatted_address; // the location name
+        var lon = data.results[0].geometry.location.lng;
+        var lat = data.results[0].geometry.location.lat;
 
-	  // now, update that person
-		// mongoose method, see http://mongoosejs.com/docs/api.html#model_Model.findByIdAndUpdate  
-	  Person.findByIdAndUpdate(requestedId, dataToUpdate, function(err,data){
-	  	// if err saving, respond back with error
-	  	if (err){
-	  		var jsonData = {status:'ERROR', message: 'Error updating person'};
-	  		return res.json(jsonData);
-	  	}
+        // need to put the geo co-ordinates in a lng-lat array for saving
+        var lnglat_array = [lon, lat];
 
-	  	console.log('updated the person!');
-	  	console.log(data);
+        var dataToUpdate = {
+            name: name,
+            locationName: locationName,
+            locationGeo: lnglat_array
+        };
 
-	  	// now return the json data of the new person
-	  	var jsonData = {
-	  		status: 'OK',
-	  		person: data
-	  	}
+        // now, update that person
+        // mongoose method, see http://mongoosejs.com/docs/api.html#model_Model.findByIdAndUpdate
+        Person.findByIdAndUpdate(requestedId, dataToUpdate, function (err, data) {
+            // if err saving, respond back with error
+            if (err) {
+                var jsonData = {status: 'ERROR', message: 'Error updating person'};
+                return res.json(jsonData);
+            }
 
-	  	return res.json(jsonData);
+            console.log('updated the person!');
+            console.log(data);
 
-	  })
+            // now return the json data of the new person
+            var jsonData = {
+                status: 'OK',
+                person: data
+            }
 
-	});
+            return res.json(jsonData);
+
+        })
+
+    });
 
 }
 
@@ -233,25 +256,25 @@ exports.update = function(req,res){
  * @return {Object} JSON
  */
 
-exports.remove = function(req,res){
+exports.remove = function (req, res) {
 
-	var requestedId = req.param('id');
+    var requestedId = req.param('id');
 
-	// Mongoose method, http://mongoosejs.com/docs/api.html#model_Model.findByIdAndRemove
-	Person.findByIdAndRemove(requestedId,function(err, data){
-		if(err || data == null){
-  		var jsonData = {status:'ERROR', message: 'Could not find that person to delete'};
-  		return res.json(jsonData);
-		}
+    // Mongoose method, http://mongoosejs.com/docs/api.html#model_Model.findByIdAndRemove
+    Person.findByIdAndRemove(requestedId, function (err, data) {
+        if (err || data == null) {
+            var jsonData = {status: 'ERROR', message: 'Could not find that person to delete'};
+            return res.json(jsonData);
+        }
 
-		// otherwise, respond back with success
-		var jsonData = {
-			status: 'OK',
-			message: 'Successfully deleted id ' + requestedId
-		}
+        // otherwise, respond back with success
+        var jsonData = {
+            status: 'OK',
+            message: 'Successfully deleted id ' + requestedId
+        }
 
-		res.json(jsonData);
+        res.json(jsonData);
 
-	})
+    })
 
 }

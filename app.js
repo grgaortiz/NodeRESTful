@@ -1,4 +1,3 @@
-
 /**
  * Module dependencies.
  */
@@ -9,6 +8,7 @@ var path = require('path');
 var mongoose = require('mongoose');
 var bodyParser = require('body-parser');
 var methodOverride = require('method-override');
+var request = require('request');
 
 // the ExpressJS App
 var app = express();
@@ -19,7 +19,7 @@ var app = express();
 app.set('port', process.env.PORT || 5000);
 
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({extended: false}));
 app.use(methodOverride());
 
 // connecting to database
@@ -30,15 +30,15 @@ console.log("connected to database");
  * CORS support for AJAX requests
  */
 
-app.all('*', function(req, res, next){
-  if (!req.get('Origin')) return next();
-  // use "*" here to accept any origin
-  res.set('Access-Control-Allow-Origin', '*');
-  res.set('Access-Control-Allow-Methods', 'PUT');
-  res.set('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type');
-  // res.set('Access-Control-Allow-Max-Age', 3600);
-  if ('OPTIONS' == req.method) return res.send(200);
-  next();
+app.all('*', function (req, res, next) {
+    if (!req.get('Origin')) return next();
+    // use "*" here to accept any origin
+    res.set('Access-Control-Allow-Origin', '*');
+    res.set('Access-Control-Allow-Methods', 'PUT');
+    res.set('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type');
+    // res.set('Access-Control-Allow-Max-Age', 3600);
+    if ('OPTIONS' == req.method) return res.send(200);
+    next();
 });
 
 // api baseURI is at /api/
@@ -60,24 +60,27 @@ app.get('/', routes.index); // calls index function in /routes/index.js
 
 // API routes
 app.post('/api/create', routes.create); // API create route and callback (see /routes/index.js)
-app.get('/api/get/:id', routes.getOne); // API retrieve 1 route and callback (see /routes/index.js)
+// app.get('/api/get/:id', routes.getOne); // API retrieve 1 route and callback (see /routes/index.js)
 app.get('/api/get', routes.getAll); // API retrieve all route and callback (see /routes/index.js)
 app.post('/api/update/:id', routes.update); // API update route and callback (see /routes/index.js)
 app.get('/api/delete/:id', routes.remove); // API delete route and callback (see /routes/index.js)
 
-// if route not found, respond with 404
-app.use(function(req, res, next){
+// Playground Routes
+app.get('/api/get/:url', routes.getUrl);
 
-	var jsonData = {
-		status: 'ERROR',
-		message: 'Sorry, we cannot find the requested URI'
-	}
-	// set status as 404 and respond with data
-  res.status(404).send(jsonData);
+// if route not found, respond with 404
+app.use(function (req, res, next) {
+
+    var jsonData = {
+        status: 'ERROR',
+        message: 'Sorry, we cannot find the requested URI'
+    }
+    // set status as 404 and respond with data
+    res.status(404).send(jsonData);
 
 });
 
 // create NodeJS HTTP server using 'app'
-http.createServer(app).listen(app.get('port'), function(){
-  console.log("Express server listening on port " + app.get('port'));
+http.createServer(app).listen(app.get('port'), function () {
+    console.log("Express server listening on port " + app.get('port'));
 });
