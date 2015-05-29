@@ -6,6 +6,7 @@
 
 // dependencies
 var geocoder = require('geocoder');
+var async = require('async');
 var extractor = require('email-extractor').Extractor;
 
 // our db model
@@ -139,16 +140,23 @@ exports.getOne = function (req, res) {
 exports.getUrl = function (req, res) {
 
     var requestedUrl = req.param('url');
+    var jsonData = [];
+    var getUrlAsync = [];
 
-    extractor(requestedUrl, function (url, email) {
-
-        var jsonData = {
-            url: url,
-            email: email
-        }
-
-        return res.json(jsonData);
+    getUrlAsync.push(function(callback) {
+        extractor('http://'+requestedUrl, function (url, email) {
+            jsonData[url] = {
+                email: email
+            }
+        });
     });
+
+    async.parallel(
+        getUrlAsync,
+        function (err, results) {
+            return res.json(jsonData);
+        }
+    );
 
 }
 
@@ -159,6 +167,8 @@ exports.getUrl = function (req, res) {
  */
 
 exports.getAll = function (req, res) {
+
+    console.log('getAll');
 
     // mongoose method, see http://mongoosejs.com/docs/api.html#model_Model.find
     Person.find(function (err, data) {
