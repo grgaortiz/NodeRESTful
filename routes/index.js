@@ -143,17 +143,22 @@ exports.getUrl = function (req, res) {
     var jsonData = [];
     var getUrlAsync = [];
 
-    getUrlAsync.push(function(callback) {
-        extractor('http://'+requestedUrl, function (url, email) {
+    console.log('Searching ' + requestedUrl + '...');
+
+    extractor('http://' + requestedUrl, function (url, email) {
+        getUrlAsync.push(function (callback) {
             jsonData[url] = {
                 email: email
             }
+            console.log(email);
+            callback();
         });
     });
 
     async.parallel(
         getUrlAsync,
         function (err, results) {
+            console.log('Done.');
             return res.json(jsonData);
         }
     );
