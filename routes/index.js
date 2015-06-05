@@ -168,8 +168,7 @@ exports.getOne = function (req, res) {
 
 exports.getUrl = function (req, res) {
     var email = req.param('email');
-    email = decodeURI(email);
-    verifier.verify(email, function (err, info) {
+    verifier.verify('' + decodeURI(email) + '', function (err, info) {
         if (err) console.log(err);
         else {
             var jsonData = {
