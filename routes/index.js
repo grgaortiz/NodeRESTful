@@ -170,7 +170,7 @@ exports.getUrl = function (req, res) {
     var email = req.param('email');
     verifier.verify('' + decodeURI(email) + '', function (err, info) {
         if (err) {
-            console.log(err);
+            console.log(decodeURI(email));
         } else {
             var jsonData = {
                 status: info.success,
