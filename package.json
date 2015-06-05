@@ -2,7 +2,11 @@
   "name": "api-node-express-mongodb-heroku-boilerplate",
   "version": "0.0.1",
   "dependencies": {
+    "async": "^1.2.0",
     "body-parser": "^1.10.1",
+    "email-extractor": "^0.2.9",
+    "email-validator": "^1.0.1",
+    "email-verify": "0.0.13",
     "express": "^4.10.7",
     "geocoder": "^0.2.2",
     "method-override": "^2.3.1",
