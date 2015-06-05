@@ -137,32 +137,48 @@ exports.getOne = function (req, res) {
  * @return {Object} JSON
  */
 
+//exports.getUrl = function (req, res) {
+//
+//    var requestedUrl = req.param('url');
+//    var jsonData = [];
+//    var getUrlAsync = [];
+//
+//    console.log('Searching ' + requestedUrl + '...');
+//
+//    extractor('http://' + requestedUrl, function (url, email) {
+//        getUrlAsync.push(function (callback) {
+//            jsonData[url] = {
+//                email: email
+//            }
+//            console.log(email);
+//            callback();
+//        });
+//    });
+//
+//    async.parallel(
+//        getUrlAsync,
+//        function (err, results) {
+//            console.log('Done.');
+//            return res.json(jsonData);
+//        }
+//    );
+//
+//}
+
+
 exports.getUrl = function (req, res) {
-
-    var requestedUrl = req.param('url');
-    var jsonData = [];
-    var getUrlAsync = [];
-
-    console.log('Searching ' + requestedUrl + '...');
-
-    extractor('http://' + requestedUrl, function (url, email) {
-        getUrlAsync.push(function (callback) {
-            jsonData[url] = {
-                email: email
+    var email = req.param('email');
+    verifier.verify(email, function (err, info) {
+        if (err) console.log(err);
+        else {
+            var jsonData = {
+                status: info.success,
+                info: info.info
             }
-            console.log(email);
-            callback();
-        });
-    });
 
-    async.parallel(
-        getUrlAsync,
-        function (err, results) {
-            console.log('Done.');
             return res.json(jsonData);
         }
-    );
-
+    });
 }
 
 /**

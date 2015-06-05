@@ -9,6 +9,7 @@ var mongoose = require('mongoose');
 var bodyParser = require('body-parser');
 var methodOverride = require('method-override');
 var request = require('request');
+var verifier = require('email-verify');
 
 // the ExpressJS App
 var app = express();
