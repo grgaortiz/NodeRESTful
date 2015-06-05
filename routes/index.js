@@ -247,37 +247,41 @@ exports.getEmailFromName = function (req, res) {
     var n = permutations.length;
     var functionsToRunAsync = [];
     var email = [];
-    for(var i = 0; i >= n; i++) {
-        functionsToRunAsync.push(function (callback) {
-            verifier.verify('' + decodeURI(permutations[i]) + '', function (err, info) {
-                console.log(decodeURI(permutations[i]));
-                if (info.success == 'true') {
-                    if (err) {
-                        console.log(err);
-                    } else {
-                        var jsonData = {
-                            status: info.success,
-                            info: info.info,
-                            email: decodeURI(permutations[i])
+
+    var run = function (callback) {
+        for (var i = 0; i >= n; i++) {
+            functionsToRunAsync.push(function (callback) {
+                verifier.verify('' + decodeURI(permutations[i]) + '', function (err, info) {
+                    console.log(decodeURI(permutations[i]));
+                    if (info.success == 'true') {
+                        if (err) {
+                            console.log(err);
+                        } else {
+                            var jsonData = {
+                                status: info.success,
+                                info: info.info,
+                                email: decodeURI(permutations[i])
+                            }
+                            console.log(jsonData);
+                            email.push(jsonData);
                         }
-                        console.log(jsonData);
-                        email.push(jsonData);
+                        callback();
+                    } else {
                         callback();
                     }
-                } else {
-                    callback();
-                }
 
+                });
             });
-        });
+        }
+
+        async.parallel(
+            functionsToRunAsync,
+            function (err, results) {    // all async functions complete
+                return email;
+            });
     }
 
-    async.parallel(
-        functionsToRunAsync,
-        function (err, results) {    // all async functions complete
-            return res.json(email);
-        });
-
+    return res.json(run);
 }
 
 /**
