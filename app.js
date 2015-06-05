@@ -62,7 +62,15 @@ app.get('/', routes.index); // calls index function in /routes/index.js
 app.post('/api/create', routes.create); // API create route and callback (see /routes/index.js)
 // app.get('/api/get/:id', routes.getOne); // API retrieve 1 route and callback (see /routes/index.js)
 
-app.get('/api/get/:email', routes.validateEmail); // Test
+/**
+ * Validate single email
+ */
+app.get('/api/email/validate/:email', routes.validateEmail);
+
+/**
+ * Retrieve email from name
+ */
+app.get('/api/email/get/:domain/:first_name/:last_name', routes.getEmailFromName);
 
 app.get('/api/get', routes.getAll); // API retrieve all route and callback (see /routes/index.js)
 app.post('/api/update/:id', routes.update); // API update route and callback (see /routes/index.js)
