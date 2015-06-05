@@ -8,7 +8,7 @@
 var geocoder = require('geocoder');
 var async = require('async');
 var extractor = require('email-extractor').Extractor;
-// var verifier = require('email-verify');
+var verifier = require('email-verify');
 
 // our db model
 var Person = require("../models/model.js");
@@ -166,21 +166,20 @@ exports.getOne = function (req, res) {
 //
 //}
 
+exports.getUrl = function (req, res) {
+    var email = req.param('email');
+    verifier.verify(email, function (err, info) {
+        if (err) console.log(err);
+        else {
+            var jsonData = {
+                status: info.success,
+                info: info.info
+            }
 
-//exports.getUrl = function (req, res) {
-//    var email = req.param('email');
-//    verifier.verify(email, function (err, info) {
-//        if (err) console.log(err);
-//        else {
-//            var jsonData = {
-//                status: info.success,
-//                info: info.info
-//            }
-//
-//            return res.json(jsonData);
-//        }
-//    });
-//}
+            return res.json(jsonData);
+        }
+    });
+}
 
 /**
  * GET '/api/get'
