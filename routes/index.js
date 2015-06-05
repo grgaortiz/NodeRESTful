@@ -246,6 +246,7 @@ exports.getEmailFromName = function (req, res) {
 
     var n = permutations.length;
     var functionsToRunAsync = [];
+    var email = [];
     for(var i = 0; i >= n; i++) {
         functionsToRunAsync.push(function (callback) {
             verifier.verify('' + decodeURI(permutations[i]) + '', function (err, info) {
@@ -260,6 +261,7 @@ exports.getEmailFromName = function (req, res) {
                             email: decodeURI(permutations[i])
                         }
                         console.log(jsonData);
+                        email.push(jsonData);
                         callback();
                     }
                 } else {
@@ -273,7 +275,7 @@ exports.getEmailFromName = function (req, res) {
     async.parallel(
         functionsToRunAsync,
         function (err, results) {    // all async functions complete
-            return res.json(jsonData);
+            return res.json(email);
         });
 
 }
