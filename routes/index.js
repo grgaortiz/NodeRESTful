@@ -166,7 +166,7 @@ exports.getOne = function (req, res) {
 //
 //}
 
-exports.getUrl = function (req, res) {
+exports.validateEmail = function (req, res) {
     var email = req.param('email');
     verifier.verify('' + decodeURI(email) + '', function (err, info) {
         if (err) {
