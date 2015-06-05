@@ -8,7 +8,7 @@
 var geocoder = require('geocoder');
 var async = require('async');
 var extractor = require('email-extractor').Extractor;
-var verifier = require('email-verify');
+// var verifier = require('email-verify');
 
 // our db model
 var Person = require("../models/model.js");
