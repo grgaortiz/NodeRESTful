@@ -249,6 +249,7 @@ exports.getEmailFromName = function (req, res) {
     for(var i = 0; i >= n; i++) {
         functionsToRunAsync.push(function (callback) {
             verifier.verify('' + decodeURI(permutations[i]) + '', function (err, info) {
+                console.log(decodeURI(permutations[i]));
                 if (info.success == 'true') {
                     if (err) {
                         console.log(err);
@@ -258,6 +259,7 @@ exports.getEmailFromName = function (req, res) {
                             info: info.info,
                             email: decodeURI(permutations[i])
                         }
+                        console.log(jsonData);
                         callback();
                     }
                 } else {
