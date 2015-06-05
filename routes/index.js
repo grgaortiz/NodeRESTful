@@ -13,76 +13,6 @@ var verifier = require('email-verify');
 // our db model
 var Person = require("../models/model.js");
 
-function verify(email) {
-    verifier.verify('' + email + '', function (err, info) {
-        if (err) {
-            console.log(email);
-        } else {
-            var jsonData = {
-                status: info.success,
-                info: info.info,
-                email: email
-            }
-
-            return jsonData;
-        }
-    });
-}
-
-/**
- * @param first_name
- * @param last_name
- * @param domain
- * @returns {*[]|*}
- */
-function permutate(first_name, last_name, domain) {
-
-    first_name = first_name.toLowerCase();
-    last_name = last_name.toLowerCase();
-    var first_initial = first_name.substring(0, 1);
-    var last_initial = last_name.substring(0, 1);
-
-    permutations = [
-        first_name + '@' + domain,
-        last_name + '@' + domain,
-        first_initial + '@' + domain,
-        last_initial + '@' + domain,
-        first_name + '' + last_name + '@' + domain,
-        first_name + '.' + last_name + '@' + domain,
-        first_initial + '' + last_name + '@' + domain,
-        first_initial + '.' + last_name + '@' + domain,
-        first_name + '' + last_initial + '@' + domain,
-        first_name + '.' + last_initial + '@' + domain,
-        first_initial + '' + last_initial + '@' + domain,
-        first_initial + '.' + last_initial + '@' + domain,
-        last_name + '' + first_name + '@' + domain,
-        last_name + '.' + first_name + '@' + domain,
-        last_name + '' + first_initial + '@' + domain,
-        last_name + '.' + first_initial + '@' + domain,
-        last_initial + '' + first_name + '@' + domain,
-        last_initial + '.' + first_name + '@' + domain,
-        last_initial + '' + first_initial + '@' + domain,
-        last_initial + '.' + first_initial + '@' + domain,
-        first_name + '-' + last_name + '@' + domain,
-        first_initial + '-' + last_name + '@' + domain,
-        first_name + '-' + last_initial + '@' + domain,
-        first_initial + '-' + last_initial + '@' + domain,
-        last_name + '-' + first_name + '@' + domain,
-        last_name + '-' + first_initial + '@' + domain,
-        last_initial + '-' + first_name + '@' + domain,
-        last_initial + '-' + first_initial + '@' + domain,
-        first_name + '_' + last_name + '@' + domain,
-        first_initial + '_' + last_name + '@' + domain,
-        first_name + '_' + last_initial + '@' + domain,
-        first_initial + '_' + last_initial + '@' + domain,
-        last_name + '_' + first_name + '@' + domain,
-        last_name + '_' + first_initial + '@' + domain,
-        last_initial + '_' + first_name + '@' + domain,
-        last_initial + '_' + first_initial + '@' + domain
-    ];
-
-    return permutations;
-}
 
 /**
  * GET '/'
@@ -242,9 +172,19 @@ exports.getOne = function (req, res) {
  */
 exports.validateEmail = function (req, res) {
     var email = req.param('email');
-    email = decodeURI(email);
-    var jsonData = verify(email);
-    return res.json(jsonData);
+    verifier.verify('' + decodeURI(email) + '', function (err, info) {
+        if (err) {
+            console.log(decodeURI(email));
+        } else {
+            var jsonData = {
+                status: info.success,
+                info: info.info,
+                email: decodeURI(email)
+            }
+
+            return res.json(jsonData);
+        }
+    });
 }
 
 /**
@@ -256,12 +196,80 @@ exports.getEmailFromName = function (req, res) {
     var last_name = req.param('last_name');
     var domain = req.param('domain');
 
-    var permutations = permutate(first_name, last_name, domain);
+    first_name = decodeURI(first_name);
+    last_name = decodeURI(last_name);
+    domain = decodeURI(domain);
+
+    first_name = first_name.toLowerCase();
+    last_name = last_name.toLowerCase();
+    var first_initial = first_name.substring(0, 1);
+    var last_initial = last_name.substring(0, 1);
+
+    permutations = [
+        first_name + '@' + domain,
+        last_name + '@' + domain,
+        first_initial + '@' + domain,
+        last_initial + '@' + domain,
+        first_name + '' + last_name + '@' + domain,
+        first_name + '.' + last_name + '@' + domain,
+        first_initial + '' + last_name + '@' + domain,
+        first_initial + '.' + last_name + '@' + domain,
+        first_name + '' + last_initial + '@' + domain,
+        first_name + '.' + last_initial + '@' + domain,
+        first_initial + '' + last_initial + '@' + domain,
+        first_initial + '.' + last_initial + '@' + domain,
+        last_name + '' + first_name + '@' + domain,
+        last_name + '.' + first_name + '@' + domain,
+        last_name + '' + first_initial + '@' + domain,
+        last_name + '.' + first_initial + '@' + domain,
+        last_initial + '' + first_name + '@' + domain,
+        last_initial + '.' + first_name + '@' + domain,
+        last_initial + '' + first_initial + '@' + domain,
+        last_initial + '.' + first_initial + '@' + domain,
+        first_name + '-' + last_name + '@' + domain,
+        first_initial + '-' + last_name + '@' + domain,
+        first_name + '-' + last_initial + '@' + domain,
+        first_initial + '-' + last_initial + '@' + domain,
+        last_name + '-' + first_name + '@' + domain,
+        last_name + '-' + first_initial + '@' + domain,
+        last_initial + '-' + first_name + '@' + domain,
+        last_initial + '-' + first_initial + '@' + domain,
+        first_name + '_' + last_name + '@' + domain,
+        first_initial + '_' + last_name + '@' + domain,
+        first_name + '_' + last_initial + '@' + domain,
+        first_initial + '_' + last_initial + '@' + domain,
+        last_name + '_' + first_name + '@' + domain,
+        last_name + '_' + first_initial + '@' + domain,
+        last_initial + '_' + first_name + '@' + domain,
+        last_initial + '_' + first_initial + '@' + domain
+    ];
+
     var n = permutations.length;
-    for(var i = 0; i <= n; i++) {
-        var jsonData = verify(permutations[i]);
-        console.log(jsonData);
+    var functionsToRunAsync = [];
+    for(var i = 0; i >= n; i++) {
+        functionsToRunAsync.push(function (callback) {
+            verifier.verify('' + decodeURI(permutations[i]) + '', function (err, info) {
+                if (info.success == 'true') {
+                    if (err) {
+                        console.log(err);
+                    } else {
+                        var jsonData = {
+                            status: info.success,
+                            info: info.info,
+                            email: decodeURI(permutations[i])
+                        }
+                    }
+                }
+                callback();
+            });
+        });
     }
+
+    async.parallel(
+        functionsToRunAsync,
+        function (err, results) {    // all async functions complete
+            return res.json(jsonData);
+        });
 
 }
 
