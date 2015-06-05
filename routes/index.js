@@ -258,9 +258,12 @@ exports.getEmailFromName = function (req, res) {
                             info: info.info,
                             email: decodeURI(permutations[i])
                         }
+                        callback();
                     }
+                } else {
+                    callback();
                 }
-                callback();
+
             });
         });
     }
